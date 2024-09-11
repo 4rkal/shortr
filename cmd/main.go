@@ -24,9 +24,7 @@ type StatsFormData struct {
 	Id string `form:"id"`
 }
 
-var linkMap = map[string]*models.Link{
-	"example": {Id: "example", Url: "https://example.com"},
-}
+var linkMap = map[string]*models.Link{}
 
 func main() {
 	e := echo.New()
