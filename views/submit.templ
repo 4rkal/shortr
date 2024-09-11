@@ -1,0 +1,13 @@
+package views 
+
+templ Submission(url string){
+
+@Base() {
+    <h1>Your url is: {url}</h1>
+
+    <form action="/stats" method="post">
+        <input type="hidden" id="id" name="id" value={url}>
+        <button type="submit">Stats</button>
+    </form>
+}
+}

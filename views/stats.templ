@@ -1,0 +1,27 @@
+package views
+
+import (
+  "github.com/4rkal/shortr/models"
+  "fmt"
+
+)
+
+templ StatsForm(){
+  @Base(){
+    <form action="/stats" method="post">
+    <label for="name">Website ID:</label>
+    <input type="text" id="id" name="id" required>
+    <br>
+    <input type="submit" value="Submit">
+</form>
+  }
+}
+
+templ Stats(link *models.Link){
+  @Base(){
+    <h1>Statistics for {link.Url}</h1>
+
+    <h2>Visitors {fmt.Sprintf("%v",link.Clicks)}</h2>
+
+  }
+}
