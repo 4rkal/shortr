@@ -1,6 +1,6 @@
 version: '3.8'
 services:  
-  shortr-app:    
+  shortr:    
     build:      
       context: .      
       dockerfile: Dockerfile    
