@@ -5,6 +5,8 @@ import (
 	"math/rand"
 	"net/http"
 	"net/url"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/4rkal/shortr/models"
@@ -48,6 +50,10 @@ func RedirectHandler(c echo.Context) error {
 	link, found := linkMap[id]
 	if !found {
 		return c.String(http.StatusNotFound, "Link not found")
+	}
+
+	if !strings.Contains(link.Url, "://") {
+		link.Url = "http://" + link.Url
 	}
 
 	link.Clicks = link.Clicks + 1
@@ -102,8 +108,26 @@ func StatsSubmissionHandler(c echo.Context) error {
 }
 
 func isURL(s string) bool {
-	_, err := url.ParseRequestURI(s)
-	return err == nil
+	if !strings.Contains(s, "://") {
+		s = "http://" + s
+	}
+
+	parsedUrl, err := url.ParseRequestURI(s)
+	if err != nil {
+		return false
+	}
+
+	if parsedUrl.Host == "" {
+		return false
+	}
+
+	domainRegex := `^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$`
+	matched, err := regexp.MatchString(domainRegex, parsedUrl.Host)
+	if err != nil || !matched {
+		return false
+	}
+
+	return true
 }
 
 func generateRandomString(length int) string {

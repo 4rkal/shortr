@@ -41,7 +41,7 @@ func Index() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"card\"><h1>Blazingly fast URL shortener</h1><p>Shorten URLs and track clicks</p><form action=\"/submit\" method=\"post\"><input type=\"url\" id=\"url\" name=\"url\" placeholder=\"Enter URL here...\"> <button type=\"submit\">Shorten URL</button></form></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"card\"><h1>Blazingly fast URL shortener</h1><p>Shorten URLs and track clicks</p><form action=\"/submit\" method=\"post\"><input type=\"text\" id=\"url\" name=\"url\" placeholder=\"Enter URL here...\"> <button type=\"submit\">Shorten URL</button></form></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
