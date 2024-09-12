@@ -1,6 +1,6 @@
 # shortr
 
-A blazingly fast url shortener, written in go
+***Blazingly fast*** url shortener, written in go
 
 ## Instaallation
 The first step is cloning this repo:
