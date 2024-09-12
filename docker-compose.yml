@@ -7,3 +7,4 @@ services:
     ports:      
       - "8080:8080"    
     restart: unless-stopped
+    command: ["/shortr", "--url", "app.4rkal.com"]

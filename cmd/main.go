@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -27,6 +28,14 @@ type StatsFormData struct {
 }
 
 var linkMap = map[string]*models.Link{}
+
+var baseurl *string
+
+func init() {
+	baseurl = flag.String("url", "127.0.0.1:8080", "The url (domain) that the server is running on")
+
+	flag.Parse()
+}
 
 func main() {
 	e := echo.New()
@@ -86,7 +95,7 @@ func SubmitHandler(c echo.Context) error {
 
 	linkMap[id] = &models.Link{Id: id, Url: data.Url}
 
-	return views.Submission(id).Render(c.Request().Context(), c.Response())
+	return views.Submission(id, *baseurl).Render(c.Request().Context(), c.Response())
 }
 
 func StatsHandler(c echo.Context) error {

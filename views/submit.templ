@@ -1,9 +1,9 @@
 package views 
 
-templ Submission(url string){
+templ Submission(url, baseurl string){
 
 @Base() {
-    <h1>Your url is: {url}</h1>
+    <h1>Your url is: <code>{baseurl + "/" + url}</code></h1>
 
     <form action="/stats" method="post">
         <input type="hidden" id="id" name="id" value={url}>
