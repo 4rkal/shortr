@@ -47,6 +47,7 @@ func main() {
 	e.GET("/stats", StatsHandler)
 	e.POST("/stats", StatsSubmissionHandler)
 	e.GET("/:id", RedirectHandler)
+	e.GET("/:id/", RedirectHandler)
 	e.GET("/", IndexHandler)
 	e.POST("/submit", SubmitHandler)
 
