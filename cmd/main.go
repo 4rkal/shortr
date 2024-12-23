@@ -48,10 +48,6 @@ func init() {
 		panic(fmt.Sprintf("Failed to connect to database: %v", err))
 	}
 
-	if err := loadLinksIntoMemory(); err != nil {
-		panic(fmt.Sprintf("Failed to load links into memory: %v", err))
-	}
-
 	_, err = db.Exec(`
 	    CREATE TABLE IF NOT EXISTS links (
 	        id VARCHAR(255) PRIMARY KEY,
@@ -59,6 +55,10 @@ func init() {
 	        clicks INTEGER NOT NULL DEFAULT 0
 	    )
 	`)
+
+	if err := loadLinksIntoMemory(); err != nil {
+		panic(fmt.Sprintf("Failed to load links into memory: %v", err))
+	}
 	if err != nil {
 		log.Fatal("Error creating table: ", err)
 	}
