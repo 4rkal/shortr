@@ -11,6 +11,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/4rkal/shortr/models"
@@ -32,6 +33,7 @@ type StatsFormData struct {
 }
 
 var linkMap = map[string]*models.Link{}
+var linkMapMutex sync.RWMutex
 
 var baseurl *string
 var db *sql.DB
@@ -44,10 +46,6 @@ func init() {
 	db, err = sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		panic(fmt.Sprintf("Failed to connect to database: %v", err))
-	}
-
-	if err := db.Ping(); err != nil {
-		panic(fmt.Sprintf("Failed to ping database: %v", err))
 	}
 
 	if err := loadLinksIntoMemory(); err != nil {
@@ -63,10 +61,6 @@ func init() {
 	`)
 	if err != nil {
 		log.Fatal("Error creating table: ", err)
-	}
-
-	if err := loadLinksIntoMemory(); err != nil {
-		log.Fatalf("Failed to load links into memory: %v", err)
 	}
 }
 
@@ -90,7 +84,9 @@ func main() {
 func RedirectHandler(c echo.Context) error {
 	id := c.Param("id")
 
+	linkMapMutex.RLock()
 	link, found := linkMap[id]
+	linkMapMutex.RUnlock()
 	if !found {
 		return c.String(http.StatusNotFound, "Link not found")
 	}
@@ -134,7 +130,9 @@ func SubmitHandler(c echo.Context) error {
 		}
 	}
 
+	linkMapMutex.Lock()
 	linkMap[id] = &models.Link{Id: id, Url: data.Url}
+	linkMapMutex.Unlock()
 
 	_, err := db.Exec("INSERT INTO links (id, url, clicks) VALUES ($1, $2, $3)", id, data.Url, 0)
 	if err != nil {
@@ -201,6 +199,9 @@ func loadLinksIntoMemory() error {
 		return fmt.Errorf("query error: %v", err)
 	}
 	defer rows.Close()
+
+	linkMapMutex.Lock()
+	defer linkMapMutex.Unlock()
 
 	for rows.Next() {
 		var id, url string

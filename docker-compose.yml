@@ -22,9 +22,10 @@ services:
       POSTGRES_DB: shortr
     ports:
       - "5432:5432"
+    restart: unless-stopped
     volumes:
       - pgdata:/var/lib/postgresql/data
 
-
 volumes:
   pgdata:
+    driver: local
