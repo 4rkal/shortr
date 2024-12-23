@@ -8,7 +8,7 @@ import (
 
 templ StatsForm(){
   @Base(){
-    <form action="/stats" method="post">
+    <form action="/stats" method="get">
     <label for="name">Website ID:</label>
     <input type="text" id="id" name="id" required>
     <br>
@@ -19,7 +19,8 @@ templ StatsForm(){
 
 templ Stats(link *models.Link){
   @Base(){
-    <h1>Statistics for {link.Url}</h1>
+    <h1>Statistics for {link.Id}</h1>
+    <h2>{link.Url}</h2>
 
     <h2>Visitors {fmt.Sprintf("%v",link.Clicks)}</h2>
 

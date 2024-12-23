@@ -46,7 +46,7 @@ func StatsForm() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form action=\"/stats\" method=\"post\"><label for=\"name\">Website ID:</label> <input type=\"text\" id=\"id\" name=\"id\" required><br><input type=\"submit\" value=\"Submit\"></form>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form action=\"/stats\" method=\"get\"><label for=\"name\">Website ID:</label> <input type=\"text\" id=\"id\" name=\"id\" required><br><input type=\"submit\" value=\"Submit\"></form>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -98,24 +98,37 @@ func Stats(link *models.Link) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var5 string
-			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(link.Url)
+			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(link.Id)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/stats.templ`, Line: 22, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/stats.templ`, Line: 22, Col: 31}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1><h2>Visitors ")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h1><h2>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var6 string
-			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v", link.Clicks))
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(link.Url)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/stats.templ`, Line: 24, Col: 47}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/stats.templ`, Line: 23, Col: 17}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h2><h2>Visitors ")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var7 string
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%v", link.Clicks))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/stats.templ`, Line: 25, Col: 47}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

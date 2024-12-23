@@ -54,7 +54,7 @@ func Submission(url, baseurl string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</code></h1><form action=\"/stats\" method=\"post\"><input type=\"hidden\" id=\"id\" name=\"id\" value=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</code></h1><form action=\"/stats\" method=\"get\"><input type=\"hidden\" id=\"id\" name=\"id\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

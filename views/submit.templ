@@ -5,7 +5,7 @@ templ Submission(url, baseurl string){
 @Base() {
     <h1>Your url is: <code>{baseurl + "/" + url}</code></h1>
 
-    <form action="/stats" method="post">
+    <form action="/stats" method="get">
         <input type="hidden" id="id" name="id" value={url}>
         <button type="submit">Stats</button>
     </form>

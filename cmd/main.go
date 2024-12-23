@@ -1,11 +1,14 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"net/url"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -15,6 +18,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	_ "github.com/lib/pq"
 )
 
 const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -30,11 +34,40 @@ type StatsFormData struct {
 var linkMap = map[string]*models.Link{}
 
 var baseurl *string
+var db *sql.DB
 
 func init() {
-	baseurl = flag.String("url", "127.0.0.1:8080", "The url (domain) that the server is running on")
-
+	baseurl = flag.String("url", "127.0.0.1:8080", "The URL (domain) that the server is running on")
 	flag.Parse()
+
+	var err error
+	db, err = sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		panic(fmt.Sprintf("Failed to connect to database: %v", err))
+	}
+
+	if err := db.Ping(); err != nil {
+		panic(fmt.Sprintf("Failed to ping database: %v", err))
+	}
+
+	if err := loadLinksIntoMemory(); err != nil {
+		panic(fmt.Sprintf("Failed to load links into memory: %v", err))
+	}
+
+	_, err = db.Exec(`
+	    CREATE TABLE IF NOT EXISTS links (
+	        id VARCHAR(255) PRIMARY KEY,
+	        url TEXT NOT NULL,
+	        clicks INTEGER NOT NULL DEFAULT 0
+	    )
+	`)
+	if err != nil {
+		log.Fatal("Error creating table: ", err)
+	}
+
+	if err := loadLinksIntoMemory(); err != nil {
+		log.Fatalf("Failed to load links into memory: %v", err)
+	}
 }
 
 func main() {
@@ -45,11 +78,11 @@ func main() {
 	e.Use(middleware.Secure())
 
 	e.GET("/stats", StatsHandler)
-	e.POST("/stats", StatsSubmissionHandler)
 	e.GET("/:id", RedirectHandler)
 	e.GET("/:id/", RedirectHandler)
 	e.GET("/", IndexHandler)
 	e.POST("/submit", SubmitHandler)
+	e.GET("/health", HealthHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
@@ -67,6 +100,13 @@ func RedirectHandler(c echo.Context) error {
 	}
 
 	link.Clicks = link.Clicks + 1
+
+	go func(id string, clicks int) {
+		_, err := db.Exec("UPDATE links SET clicks = $1 WHERE id = $2", clicks, id)
+		if err != nil {
+			fmt.Printf("Failed to update clicks for id %s: %v\n", id, err)
+		}
+	}(id, link.Clicks)
 
 	return c.Redirect(http.StatusMovedPermanently, link.Url)
 }
@@ -96,25 +136,30 @@ func SubmitHandler(c echo.Context) error {
 
 	linkMap[id] = &models.Link{Id: id, Url: data.Url}
 
+	_, err := db.Exec("INSERT INTO links (id, url, clicks) VALUES ($1, $2, $3)", id, data.Url, 0)
+	if err != nil {
+		return fmt.Errorf("failed to save link to database: %v", err)
+	}
+
 	return views.Submission(id, *baseurl).Render(c.Request().Context(), c.Response())
 }
 
 func StatsHandler(c echo.Context) error {
-	return views.StatsForm().Render(c.Request().Context(), c.Response())
+	id := c.QueryParam("id")
+	if id == "" {
+		return views.StatsForm().Render(c.Request().Context(), c.Response())
+	} else {
+		link, found := linkMap[id]
+		if !found {
+			return c.String(http.StatusNotFound, "Id not found")
+		}
+
+		return views.Stats(link).Render(c.Request().Context(), c.Response())
+	}
 }
 
-func StatsSubmissionHandler(c echo.Context) error {
-	var data StatsFormData
-	if err := c.Bind(&data); err != nil {
-		return err
-	}
-
-	link, found := linkMap[data.Id]
-	if !found {
-		return c.String(http.StatusNotFound, "Id not found")
-	}
-
-	return views.Stats(link).Render(c.Request().Context(), c.Response())
+func HealthHandler(c echo.Context) error {
+	return c.JSON(http.StatusOK, "ok")
 }
 
 func isURL(s string) bool {
@@ -148,4 +193,22 @@ func generateRandomString(length int) string {
 		result = append(result, charset[index])
 	}
 	return string(result)
+}
+
+func loadLinksIntoMemory() error {
+	rows, err := db.Query("SELECT id, url, clicks FROM links")
+	if err != nil {
+		return fmt.Errorf("query error: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var id, url string
+		var clicks int
+		if err := rows.Scan(&id, &url, &clicks); err != nil {
+			return fmt.Errorf("scan error: %v", err)
+		}
+		linkMap[id] = &models.Link{Id: id, Url: url, Clicks: clicks}
+	}
+	return nil
 }

@@ -8,3 +8,23 @@ services:
       - "8080:8080"    
     restart: unless-stopped
     command: ["/shortr", "--url", "app.4rkal.com"]
+    environment:
+      DATABASE_URL: postgres://user:CKoA5cTWHVqBxaMz@postgres:5432/shortr?sslmode=disable
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15
+    container_name: postgres_container
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: CKoA5cTWHVqBxaMz
+      POSTGRES_DB: shortr
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+
+volumes:
+  pgdata:
